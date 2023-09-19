@@ -18,27 +18,31 @@
     const gBASE_URL = "http://203.171.20.210:8080/devcamp-lucky-dice/";
     const gUTF8_TEXT_APPLICATON_HEADER = "application/json;charset=UTF-8";
     /*** REGION 2 - Vùng gán / thực thi sự kiện cho các elements */
-
-    function onClickPostAPI() {
+    function onClickPostAPI (){ debugger;
+        //fetchdData,Validate Data
+        "use strict"
         var vPersonDataObject = {
             firstname: "do",
             lastname: "nga",
             username: "ngado20"
         }
-        var PersonString = JSON.stringify(vPersonDataObject)
-        //initilize Http
-        var XmlHttpDice = new XMLHttpRequest();
-        //open setRequestHeader send
-        XmlHttpDice.open("POST",gBASE_URL + "/dice",true)
-        XmlHttpDice.setRequestHeader("content-type",gUTF8_TEXT_APPLICATON_HEADER)
-        XmlHttpDice.send(PersonString)
-        XmlHttpDice.onreadystatechange = function(){
-            //Khi quest duoc xu ly xong 
-            if(this.readyState == gREQUEST_READY_STATUS_FINISH_AND_OK && this.status ==gREQUEST_STATUS_OK){
-                displayInformation(XmlHttpDice)
+        //stringtify data before send it 
+        
+        //initilize xml
+        var XmlHttpDice = new XMLHttpRequest(); 
+        InitilizeAPI(XmlHttpDice,vPersonDataObject)
+        XmlHttpDice.onreadystatechange=function(){
+            if(this.status == gREQUEST_STATUS_OK && this.readyState == gREQUEST_READY_STATUS_FINISH_AND_OK){
+                //json response 
+                var vDiceInformation = JSON.parse(XmlHttpDice.responseText)
+                console.log("Dice's information :")
+                console.log(vDiceInformation)
+                var vRandomDice = vDiceInformation.dice
+                console.log("Dice result:"+vRandomDice)
             }
         }
-    }   
+    }
+  
     /*** REGION 3 - Event handlers - Vùng khai báo các hàm xử lý sự kiện */
     function myOnClickFunctionPostApi() {
         debugger;
@@ -68,6 +72,7 @@
                 debugger;
                 // parsing to object
                 var vResponse = JSON.parse(vXmlHttpDice.responseText);
+                console.log(vResponse)
                 // sample:  response = JSON.parse(`{"voucher":{"id":12,"maVoucher":"86423","phanTramGiamGia":"20","ghiChu":null,"ngayTao":1614361849000,"ngayCapNhat":1614361849000},"dice":4,"prize":"Xe máy"}`);
                 // get result dice
                 var vDiceReady = vResponse.dice;
@@ -78,13 +83,13 @@
     }
 
     /*** REGION 4 - Common funtions - Vùng khai báo hàm dùng chung trong toàn bộ chương trình*/
-    function displayInformation(paramAPI){
-        console.log(paramAPI.responseText)
-        //parse 
-        var vPersonJson = JSON.parse(paramAPI.responseText);
-        var vRollDice = vPersonJson.dice
-        console.log("Dice result  :"+vRollDice)
+    function InitilizeAPI(paramDiceInformation,paramPerson){
+        var vPersonString = JSON.stringify(paramPerson)
+        paramDiceInformation.open("POST",gBASE_URL + "/dice",true)
+        paramDiceInformation.setRequestHeader("content-type",gUTF8_TEXT_APPLICATON_HEADER)
+        paramDiceInformation.send(vPersonString)
     }
+    
 </script>
 
 <body class="bg bg-light">

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 24.40</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<html>
+<!-- file html dùng để thử tác động của javascript vào các thành phần trang web-->
+<script>
+    "use strict";
+    /*** REGION 1 - Global variables - Vùng khai báo biến, hằng số, tham số TOÀN CỤC */
+    const gREQUEST_STATUS_OK = 200;
+    const gREQUEST_READY_STATUS_FINISH_AND_OK = 4;
+    const gBASE_URL = "http://203.171.20.210:8080/devcamp-lucky-dice/";
+    const gUTF8_TEXT_APPLICATON_HEADER = "application/json;charset=UTF-8";
+    /*** REGION 2 - Vùng gán / thực thi sự kiện cho các elements */
+    /*** REGION 3 - Event handlers - Vùng khai báo các hàm xử lý sự kiện */
+    function onClickToGetNewDice() { debugger;
+
+        var vPersonDataObject = {
+            firstname: "",
+            lastname: "",
+            username: ""
+        }
+        //fetchData
+        fetchData(vPersonDataObject)
+        //validateData
+        var vDataStatus = isValidate(vPersonDataObject)
+        if (vDataStatus) {
+            var XmlHttpDice = new XMLHttpRequest();
+            //call api
+            var vDisplayContainerH2 = document.getElementById("h2_title")
+            var vDisplayContainerDiv = document.getElementById("result")
+            vDisplayContainerH2.style.display = "block"
+            vDisplayContainerDiv.style.display = "block"
+            callAPI(vPersonDataObject, XmlHttpDice)
+        }
+    }
+    /*** REGION 4 - Common funtions - Vùng khai báo hàm dùng chung trong toàn bộ chương trình*/
+    //fetch Data
+    function fetchData(paramPerson) {
+        var vUserNameElement = document.getElementById("inp-username")
+        var vFirstNameElement = document.getElementById("inp-firstname")
+        var vLastNameElement = document.getElementById("inp-lastname")
+
+        var vUsernameValue = vUserNameElement.value.trim()
+        var vFirstNameValue = vFirstNameElement.value.trim()
+        var vLastNameValue = vLastNameElement.value.trim()
+
+        paramPerson.username = vUsernameValue
+        paramPerson.firstname = vFirstNameValue
+        paramPerson.lastname = vLastNameValue
+    }
+    //validate
+    function isValidate(paramPerson) {
+
+        if (paramPerson.firstname == "") {
+            alert("Chưa điền firstname")
+            return false;
+        }
+        if (paramPerson.username == "") {
+            alert("Chưa điền username")
+            return false;
+        }
+        if (paramPerson.lastname == "") {
+            alert("Chưa điền lastname")
+            return false;
+        }
+        return true
+    }
+    function callAPI(paramPerson, paramApiDice) { debugger;
+        var vStringtifyPerson = JSON.stringify(paramPerson)
+        paramApiDice.open("POST", gBASE_URL + "/dice", true)
+        paramApiDice.setRequestHeader("content-type", gUTF8_TEXT_APPLICATON_HEADER)
+        paramApiDice.send(vStringtifyPerson)
+        paramApiDice.onreadystatechange = function () {
+            if (paramApiDice.readyState == gREQUEST_READY_STATUS_FINISH_AND_OK && paramApiDice.status == gREQUEST_STATUS_OK) {
+                var vPerson = JSON.parse(paramApiDice.responseText)
+                console.log(vPerson)
+                //{"voucher":{"id":61353,"maVoucher":"61353","phanTramGiamGia":"30","ghiChu":"","ngayTao":1614361849000,"ngayCapNhat":1614361849000},"dice":4,"prize":null}
+                var vResultElement =document.getElementById("p-result")
+                //kiem tra co voucher hay khong
+                var vResult = ""
+                if(vPerson.voucher === null){
+                    vResult += "New dice : "+vPerson.dice +"<br>";
+                    console.log("Không có voucher")
+                }else{
+                    vResult += "id: "+vPerson.voucher.id +"<br>"
+                    vResult += "Voucher: "+vPerson.voucher.maVoucher +"<br>"
+                    vResult += "Disocunt: "+vPerson.voucher.phanTramGiamGia +"<br>"
+                    vResult += "Note: "+vPerson.voucher.ghiChu +"<br>"
+                    vResult += "Ngay Tao: "+vPerson.voucher.ngayTao +"<br>"
+                    vResult += "Ngay Cap Nhat: "+vPerson.voucher.ngayCapNhat +"<br>"
+                    vResult += "Ket qua : "+vPerson.dice +"<br>"
+                    
+                }
+                if(vPerson.prize === null){
+                    console.log("không có phần thưởng")
+                }else {
+                    vResult += "Prize : "+vPerson.prize + "<br>"
+                }
+                vResultElement.innerHTML = vResult;
+            }
+        }
+    }
+</script>
+
+<body class="bg bg-light">
+    <div class="container">
+        <div class="form">
+            <label for="inp-username">UserName</label>
+            <input type="text" id="inp-username">
+        </div>
+        <div class="form">
+            <label for="inp-firstname">FirstName</label>
+            <input type="text" id="inp-firstname">
+        </div>
+        <div class="form">
+            <label for="inp-lastname">LastName</label>
+            <input type="text" id="inp-lastname">
+        </div>
+        <button id="btn-roll" onclick="onClickToGetNewDice()">Get New Dice</button>
+        <h2 id="h2_title" style="display: none;">Congrat you will receive these things !</h2>
+        <div id="result" style="display: none;">
+            <p id="p-result"></p>
+        </div>
+    </div>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+</body>
+
+</html>
