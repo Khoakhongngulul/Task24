@@ -15,13 +15,14 @@
             <h3>XÓA THÔNG TIN SINH VIÊN</h3>
         </div>
         <div class="row form-group">
-            <label class="col-form-label col-sm-4" for="input-student-id">Nhập Id sinh viên <span class="text-danger">(*)</span></label>
+            <label class="col-form-label col-sm-4" for="input-student-id">Nhập Id sinh viên <span
+                    class="text-danger">(*)</span></label>
             <div class="col-sm-4">
                 <input id="input-student-id" placeholder="Nhập id sinh viên ..." class="form-control">
             </div>
             <div class="col-sm-4">
-                <button class="btn btn-primary">Kiểm tra</button>
-                <button id="btn-delete-student" class="btn btn-danger disable" disabled>Xóa SV</button>
+                <button class="btn btn-primary" onclick="onclickGetIdStudent()">Kiểm tra</button>
+                <button id="btn-delete-student" class="btn btn-danger disable" disabled onclick="onClickDeleteStudentById()">Xóa SV</button>
             </div>
         </div>
         <hr>
@@ -30,21 +31,108 @@
         </div>
 </body>
 <script>
-    /*** REGION 1 - Global variables - Vùng khai báo biến, hằng số, tham số TOÀN CỤC */
-    function onclickGetIdStudent(){
-        var vStudent ={
-            id :""
-        }
-        //fetchData 
-        fetchDataStudent(vStudent)
-    }
-    /*** REGION 2 - Vùng gán / thực thi hàm xử lý sự kiện cho các elements */
+    //region 3
+    const gREQUEST_STATUS_OK = 200;
+    const gREQUEST_READY_STATUS_FINISH_AND_OK = 4;
+    var gBASE_URL = "https://624abe0dfd7e30c51c110ac6.mockapi.io/api/v1/";
 
-    /*** REGION 3 - Event handlers - Vùng khai báo các hàm xử lý sự kiện */
-    function fetchDatastudent(paramID){
-        var 
+    function onclickGetIdStudent() { debugger
+        var vStudent = {
+            id: ""
+        }
+        //fetchData
+        fetchIDStudent(vStudent);
+        //validateData
+        var vIDStatus = validateId(vStudent);
+        if (vIDStatus) {
+            //call api
+            var XmlHttpId = new XMLHttpRequest();
+            //find id 
+            findStudentById(vStudent, XmlHttpId);
+            XmlHttpId.onreadystatechange = function () {
+                handleResponse(XmlHttpId);
+            };
+        }
     }
-    /*** REGION 4 - Common funtions - Vùng khai báo hàm dùng chung trong toàn bộ chương trình*/
+    function onClickDeleteStudentById(){  debugger
+        var vStudent = {
+            id: ""
+        }
+        //fetchData
+        fetchIDStudent(vStudent);
+        //validateData
+        var vIDStatus = validateId(vStudent);
+        if (vIDStatus) {
+            //initilize http
+            var XmlHttpDelete = new XMLHttpRequest()
+                //call api
+                deleteStudentById(XmlHttpDelete,vStudent)
+                console.log("Xóa thành công")
+
+
+        }
+    }
+    //region 4
+    function handleResponse(paramAPIId) {  debugger
+        if (paramAPIId.readyState == gREQUEST_READY_STATUS_FINISH_AND_OK) {
+            if (paramAPIId.status == gREQUEST_STATUS_OK) {
+                var vIdResponse = paramAPIId.responseText;
+                var vStudent = JSON.parse(vIdResponse)
+                console.log(vStudent    )
+                console.log("Gọi Api thành công")
+                var vStatusElement = document.getElementById("lbl-status")
+                vStatusElement.innerHTML = "Trạng thái gọi api : Thành công  "
+                var vEnableDeleteBtn = document.getElementById("btn-delete-student").disabled =false
+            } else {
+                // Xử lý trường hợp lỗi khi API trả về status khác 200.
+                var vStatusElement = document.getElementById("lbl-status")
+                vStatusElement.innerHTML = "Trạng thái gọi api không thành công  "
+                console.error("Lỗi trong quá trình gọi API");
+            }
+        }
+    }
+    function handleResponseDelete(paramAPIId) {  debugger
+        if (paramAPIId.readyState == gREQUEST_READY_STATUS_FINISH_AND_OK) {
+            if (paramAPIId.status == gREQUEST_STATUS_OK) {
+                var vIdResponse = paramAPIId.responseText;
+                var vStudent = JSON.parse(vIdResponse)
+                console.log("Student bạn muốn xóa")
+                console.log(vStudent)
+                var vStatusElement = document.getElementById("lbl-status")
+                vStatusElement.innerHTML = "Trạng thái gọi api : Xóa sinh viên thành công  thành công "
+            } else {
+                // Xử lý trường hợp lỗi khi API trả về status khác 200.
+                var vStatusElement = document.getElementById("lbl-status")
+                vStatusElement.innerHTML = "Trạng thái gọi api : Xóa  sinh viên không thành công  "
+                console.error("Lỗi trong quá trình gọi API");
+            }
+        }
+    }
+    function fetchIDStudent(paramID) {  debugger
+        var vIdElement = document.getElementById("input-student-id");
+        var vIdValue = vIdElement.value.trim();
+        paramID.id = vIdValue;
+    }
+
+    function validateId(paramId) {  debugger
+        if (paramId.id == "") {
+            alert("Không được để trống id");
+            return false;
+        }
+        return true;
+    }
+
+    function findStudentById(paramID, paramApi) {  debugger
+        paramApi.open("GET", gBASE_URL + "students/" + paramID.id, true);
+        paramApi.send();
+    }
+    function deleteStudentById(paramApi,paramStudent){
+        paramApi.open("DELETE",gBASE_URL+"/students/"+paramStudent.id,true)
+        paramApi.send()
+        paramApi.onreadystatechange=function(){
+            handleResponseDelete(paramApi)
+        }
+    }
 
 </script>
 
